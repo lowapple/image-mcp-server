@@ -7,8 +7,12 @@ import {
   ListToolsRequestSchema,
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
-import OpenAI from 'openai';
+import { OpenAI } from 'openai';
 import axios from 'axios';
+import * as dotenv from 'dotenv';
+
+// .envファイルから環境変数を読み込む
+dotenv.config();
 
 // OpenAI APIキーを環境変数から取得
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;

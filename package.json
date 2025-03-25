@@ -25,6 +25,7 @@
     "@modelcontextprotocol/sdk": "^1.7.0",
     "@types/node": "^22.13.13",
     "axios": "^1.8.4",
+    "dotenv": "^16.4.7",
     "openai": "^4.89.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
