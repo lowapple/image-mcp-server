@@ -65,7 +65,7 @@ class ImageAnalysisServer {
       tools: [
         {
           name: 'analyze_image',
-          description: '画像URLを受け取り、GPT-4-turboを使用して画像の内容を分析します',
+          description: '画像URLを受け取り、GPT-4o-miniを使用して画像の内容を分析します',
           inputSchema: {
             type: 'object',
             properties: {
@@ -102,7 +102,7 @@ class ImageAnalysisServer {
         // 画像URLが有効かチェック
         await this.validateImageUrl(imageUrl);
         
-        // GPT-4-turboで画像を分析
+        // GPT-4o-miniで画像を分析
         const analysis = await this.analyzeImageWithGpt4(imageUrl);
 
         return {
@@ -145,11 +145,11 @@ class ImageAnalysisServer {
     }
   }
 
-  // GPT-4-turboで画像を分析するメソッド
+  // GPT-4o-miniで画像を分析するメソッド
   private async analyzeImageWithGpt4(imageUrl: string): Promise<string> {
     try {
       const response = await openai.chat.completions.create({
-        model: 'gpt-4-turbo',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
