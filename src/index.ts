@@ -92,13 +92,13 @@ class ImageAnalysisServer {
         // --- New Tool Definition ---
         {
           name: 'analyze_image_from_path',
-          description: 'ローカルファイルパスを受け取り、GPT-4o-miniを使用して画像の内容を分析します (サーバー実行環境からのアクセス)',
+          description: 'ローカルファイルパスから画像を読み込み、GPT-4o-miniを使用して内容を分析します。AIアシスタントはサーバーの実行環境で有効なパスを渡す必要があります（例: WSL上のサーバーならLinuxパス）。',
           inputSchema: {
             type: 'object',
             properties: {
               imagePath: {
                 type: 'string',
-                description: '分析する画像のローカルファイルパス (サーバーからアクセス可能なパス)',
+                description: '分析する画像のローカルファイルパス（サーバー実行環境からアクセス可能な形式で指定）',
               },
             },
             required: ['imagePath'],

@@ -1,18 +1,19 @@
 # image-mcp-server
 
-画像のURLを受け取り、GPT-4o-miniモデルを使用して画像の内容を分析するMCPサーバーです。
+画像URLまたはローカルファイルパスを受け取り、GPT-4o-miniモデルを使用して画像の内容を分析するMCPサーバーです。
 
 ## 機能
 
-- 画像URLを入力として受け取り、その画像の内容を詳細に分析
+- 画像URLまたはローカルファイルパスを入力として受け取り、その画像の内容を詳細に分析
 - GPT-4o-miniモデルを使用した高精度な画像認識と説明
 - 画像URLの有効性チェック機能
+- ローカルファイルからの画像読み込みとBase64エンコード
 
 ## インストール
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/champierre/image-mcp-server.git
+git clone https://github.com/champierre/image-mcp-server.git # またはForkしたリポジトリ
 cd image-mcp-server
 
 # 依存パッケージのインストール
@@ -78,12 +79,48 @@ Clineなどのツールで使用するには、MCPサーバー設定ファイル
 
 MCPサーバーが設定されると、以下のツールが利用可能になります：
 
-- `analyze_image`: 画像URLを受け取り、その内容を分析します
+- `analyze_image`: 画像URLを受け取り、その内容を分析します。
+- `analyze_image_from_path`: ローカルファイルパスを受け取り、その内容を分析します。
 
 ### 使用例
 
+**URLから分析:**
 ```
 画像URLを分析してください: https://example.com/image.jpg
+```
+
+**ローカルファイルパスから分析:**
+```
+この画像を分析してください: /path/to/your/image.jpg
+```
+
+### 注意: ローカルファイルパスの指定について
+
+`analyze_image_from_path` ツールを使用する場合、AIアシスタント（クライアント）は、**このサーバーが実行されている環境で有効なファイルパス**を指定する必要があります。
+
+- **サーバーがWSL上で実行されている場合:**
+  - AIアシスタントがWindowsパス（例: `C:\...`）を持っている場合、それをWSLパス（例: `/mnt/c/...`）に変換してからツールに渡す必要があります。
+  - AIアシスタントがWSLパスを持っている場合は、そのまま渡します。
+- **サーバーがWindows上で実行されている場合:**
+  - AIアシスタントがWSLパス（例: `/home/user/...`）を持っている場合、それをUNCパス（例: `\\wsl$\Distro\...`）に変換してからツールに渡す必要があります。
+  - AIアシスタントがWindowsパスを持っている場合は、そのまま渡します。
+
+**パス変換はAIアシスタント（またはその実行環境）の責任範囲となります。** サーバーは受け取ったパスをそのまま解釈しようとします。
+
+### 注意: ビルド時の型エラーについて
+
+`npm run build` を実行する際、`mime-types` モジュールに関するTypeScriptの型定義ファイルが見つからない旨のエラー (TS7016) が表示される場合があります。
+
+```
+src/index.ts:16:23 - error TS7016: Could not find a declaration file for module 'mime-types'. ...
+```
+
+これは型チェックのエラーであり、JavaScriptへのコンパイル自体は成功しているため、**サーバーの実行には影響ありません**。このエラーを解消したい場合は、開発依存関係として型定義ファイルをインストールしてください。
+
+```bash
+npm install --save-dev @types/mime-types
+# または
+yarn add --dev @types/mime-types
 ```
 
 ## 開発
