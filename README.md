@@ -1,5 +1,6 @@
 # image-mcp-server
 
+[![smithery badge](https://smithery.ai/badge/@champierre/image-mcp-server)](https://smithery.ai/server/@champierre/image-mcp-server)
 画像のURLを受け取り、GPT-4o-miniモデルを使用して画像の内容を分析するMCPサーバーです。
 
 ## 機能
@@ -10,6 +11,15 @@
 
 ## インストール
 
+### Installing via Smithery
+
+To install Image Analysis Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@champierre/image-mcp-server):
+
+```bash
+npx -y @smithery/cli install @champierre/image-mcp-server --client claude
+```
+
+### Manual Installation
 ```bash
 # リポジトリをクローン
 git clone https://github.com/champierre/image-mcp-server.git
