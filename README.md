@@ -1,12 +1,15 @@
 # image-mcp-server
 
-An MCP server that receives image URLs or local file paths and analyzes image content using the GPT-4o-mini model.
 
 [日本語のREADME](README.ja.md)
 
 <a href="https://glama.ai/mcp/servers/@champierre/image-mcp-server">
   <img width="380" height="200" src="https://glama.ai/mcp/servers/@champierre/image-mcp-server/badge" alt="Image Analysis MCP Server" />
 </a>
+
+[![smithery badge](https://smithery.ai/badge/@champierre/image-mcp-server)](https://smithery.ai/server/@champierre/image-mcp-server)
+An MCP server that receives image URLs or local file paths and analyzes image content using the GPT-4o-mini model.
+
 
 ## Features
 
@@ -17,6 +20,15 @@ An MCP server that receives image URLs or local file paths and analyzes image co
 
 ## Installation
 
+### Installing via Smithery
+
+To install Image Analysis Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@champierre/image-mcp-server):
+
+```bash
+npx -y @smithery/cli install @champierre/image-mcp-server --client claude
+```
+
+### Manual Installation
 ```bash
 # Clone the repository
 git clone https://github.com/champierre/image-mcp-server.git # or your forked repository
