@@ -136,4 +136,4 @@ npm run dev
 
 ## ライセンス
 
-ISC
+MIT
