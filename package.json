@@ -1,7 +1,7 @@
 {
   "name": "image-mcp-server",
   "version": "1.0.0",
-  "description": "MCP server for image analysis using GPT-4-turbo",
+  "description": "MCP server for image analysis using GPT-4o-mini",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
@@ -15,8 +15,8 @@
     "url": "git+https://github.com/champierre/image-mcp-server.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Junya Ishihara",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/champierre/image-mcp-server/issues"
   },

@@ -1,67 +1,49 @@
 # image-mcp-server
 
-画像URLまたはローカルファイルパスを受け取り、GPT-4o-miniモデルを使用して画像の内容を分析するMCPサーバーです。
+An MCP server that receives image URLs or local file paths and analyzes image content using the GPT-4o-mini model.
+
+[日本語のREADME](README.ja.md)
 
 <a href="https://glama.ai/mcp/servers/@champierre/image-mcp-server">
-  <img width="380" height="200" src="https://glama.ai/mcp/servers/@champierre/image-mcp-server/badge" alt="Image Analysis Server MCP server" />
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@champierre/image-mcp-server/badge" alt="Image Analysis MCP Server" />
 </a>
 
-## 機能
+## Features
 
-- 画像URLまたはローカルファイルパスを入力として受け取り、その画像の内容を詳細に分析
-- GPT-4o-miniモデルを使用した高精度な画像認識と説明
-- 画像URLの有効性チェック機能
-- ローカルファイルからの画像読み込みとBase64エンコード
+- Receives image URLs or local file paths as input and provides detailed analysis of the image content
+- High-precision image recognition and description using the GPT-4o-mini model
+- Image URL validity checking
+- Image loading from local files and Base64 encoding
 
-## インストール
+## Installation
 
 ```bash
-# リポジトリをクローン
-git clone https://github.com/champierre/image-mcp-server.git # またはForkしたリポジトリ
+# Clone the repository
+git clone https://github.com/champierre/image-mcp-server.git # or your forked repository
 cd image-mcp-server
 
-# 依存パッケージのインストール
+# Install dependencies
 npm install
 
-# TypeScriptのコンパイル
+# Compile TypeScript
 npm run build
 ```
 
-## 設定
+## Configuration
 
-このサーバーを使用するには、OpenAI APIキーが必要です。以下の環境変数を設定してください：
+To use this server, you need an OpenAI API key. Set the following environment variable:
 
 ```
 OPENAI_API_KEY=your_openai_api_key
 ```
 
-## MCPサーバーの設定
+## MCP Server Configuration
 
-Clineなどのツールで使用するには、MCPサーバー設定ファイルに以下の設定を追加してください：
+To use with tools like Cline, add the following settings to your MCP server configuration file:
 
-### VSCode Claude拡張機能の場合
+### For VSCode Claude Extension
 
-`cline_mcp_settings.json`に以下を追加：
-
-```json
-{
-  "mcpServers": {
-    "image-analysis": {
-      "command": "node",
-      "args": ["/path/to/image-mcp-server/dist/index.js"],
-      "env": {
-        "OPENAI_API_KEY": "your_openai_api_key"
-      },
-      "disabled": false,
-      "autoApprove": []
-    }
-  }
-}
-```
-
-### Claude Desktop Appの場合
-
-`claude_desktop_config.json`に以下を追加：
+Add the following to `cline_mcp_settings.json`:
 
 ```json
 {
@@ -79,61 +61,81 @@ Clineなどのツールで使用するには、MCPサーバー設定ファイル
 }
 ```
 
-## 使用方法
+### For Claude Desktop App
 
-MCPサーバーが設定されると、以下のツールが利用可能になります：
+Add the following to `claude_desktop_config.json`:
 
-- `analyze_image`: 画像URLを受け取り、その内容を分析します。
-- `analyze_image_from_path`: ローカルファイルパスを受け取り、その内容を分析します。
-
-### 使用例
-
-**URLから分析:**
+```json
+{
+  "mcpServers": {
+    "image-analysis": {
+      "command": "node",
+      "args": ["/path/to/image-mcp-server/dist/index.js"],
+      "env": {
+        "OPENAI_API_KEY": "your_openai_api_key"
+      },
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
 ```
-画像URLを分析してください: https://example.com/image.jpg
+
+## Usage
+
+Once the MCP server is configured, the following tools become available:
+
+- `analyze_image`: Receives an image URL and analyzes its content.
+- `analyze_image_from_path`: Receives a local file path and analyzes its content.
+
+### Usage Examples
+
+**Analyzing from URL:**
+```
+Please analyze this image URL: https://example.com/image.jpg
 ```
 
-**ローカルファイルパスから分析:**
+**Analyzing from local file path:**
 ```
-この画像を分析してください: /path/to/your/image.jpg
+Please analyze this image: /path/to/your/image.jpg
 ```
 
-### 注意: ローカルファイルパスの指定について
+### Note: Specifying Local File Paths
 
-`analyze_image_from_path` ツールを使用する場合、AIアシスタント（クライアント）は、**このサーバーが実行されている環境で有効なファイルパス**を指定する必要があります。
+When using the `analyze_image_from_path` tool, the AI assistant (client) must specify a **valid file path in the environment where this server is running**.
 
-- **サーバーがWSL上で実行されている場合:**
-  - AIアシスタントがWindowsパス（例: `C:\...`）を持っている場合、それをWSLパス（例: `/mnt/c/...`）に変換してからツールに渡す必要があります。
-  - AIアシスタントがWSLパスを持っている場合は、そのまま渡します。
-- **サーバーがWindows上で実行されている場合:**
-  - AIアシスタントがWSLパス（例: `/home/user/...`）を持っている場合、それをUNCパス（例: `\\wsl$\Distro\...`）に変換してからツールに渡す必要があります。
-  - AIアシスタントがWindowsパスを持っている場合は、そのまま渡します。
+- **If the server is running on WSL:**
+  - If the AI assistant has a Windows path (e.g., `C:\...`), it needs to convert it to a WSL path (e.g., `/mnt/c/...`) before passing it to the tool.
+  - If the AI assistant has a WSL path, it can pass it as is.
+- **If the server is running on Windows:**
+  - If the AI assistant has a WSL path (e.g., `/home/user/...`), it needs to convert it to a UNC path (e.g., `\\wsl$\Distro\...`) before passing it to the tool.
+  - If the AI assistant has a Windows path, it can pass it as is.
 
-**パス変換はAIアシスタント（またはその実行環境）の責任範囲となります。** サーバーは受け取ったパスをそのまま解釈しようとします。
+**Path conversion is the responsibility of the AI assistant (or its execution environment).** The server will try to interpret the received path as is.
 
-### 注意: ビルド時の型エラーについて
+### Note: Type Errors During Build
 
-`npm run build` を実行する際、`mime-types` モジュールに関するTypeScriptの型定義ファイルが見つからない旨のエラー (TS7016) が表示される場合があります。
+When running `npm run build`, you may see an error (TS7016) about missing TypeScript type definitions for the `mime-types` module.
 
 ```
 src/index.ts:16:23 - error TS7016: Could not find a declaration file for module 'mime-types'. ...
 ```
 
-これは型チェックのエラーであり、JavaScriptへのコンパイル自体は成功しているため、**サーバーの実行には影響ありません**。このエラーを解消したい場合は、開発依存関係として型定義ファイルをインストールしてください。
+This is a type checking error, and since the JavaScript compilation itself succeeds, it **does not affect the server's execution**. If you want to resolve this error, install the type definition file as a development dependency.
 
 ```bash
 npm install --save-dev @types/mime-types
-# または
+# or
 yarn add --dev @types/mime-types
 ```
 
-## 開発
+## Development
 
 ```bash
-# 開発モードで実行
+# Run in development mode
 npm run dev
 ```
 
-## ライセンス
+## License
 
-ISC
+MIT
