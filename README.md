@@ -3,7 +3,7 @@
 An MCP server that receives image URLs or local file paths and analyzes image content using the GPT-4o-mini model.
 
 <a href="https://glama.ai/mcp/servers/@champierre/image-mcp-server">
-  <img width="380" height="200" src="https://glama.ai/mcp/servers/@champierre/image-mcp-server/badge" alt="Image Analysis Server MCP server" />
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@champierre/image-mcp-server/badge" alt="Image Analysis MCP Server" />
 </a>
 
 ## Features
