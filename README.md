@@ -1,7 +1,6 @@
 # image-mcp-server
 
-
-[日本語のREADME](README.ja.md)
+[日本語の README](README.ja.md)
 
 <a href="https://glama.ai/mcp/servers/@champierre/image-mcp-server">
   <img width="380" height="200" src="https://glama.ai/mcp/servers/@champierre/image-mcp-server/badge" alt="Image Analysis MCP Server" />
@@ -9,7 +8,6 @@
 
 [![smithery badge](https://smithery.ai/badge/@champierre/image-mcp-server)](https://smithery.ai/server/@champierre/image-mcp-server)
 An MCP server that receives image URLs or local file paths and analyzes image content using the GPT-4o-mini model.
-
 
 ## Features
 
@@ -29,6 +27,7 @@ npx -y @smithery/cli install @champierre/image-mcp-server --client claude
 ```
 
 ### Manual Installation
+
 ```bash
 # Clone the repository
 git clone https://github.com/champierre/image-mcp-server.git # or your forked repository
@@ -53,7 +52,7 @@ OPENAI_API_KEY=your_openai_api_key
 
 To use with tools like Cline, add the following settings to your MCP server configuration file:
 
-### For VSCode Claude Extension
+### For Cline
 
 Add the following to `cline_mcp_settings.json`:
 
@@ -65,9 +64,7 @@ Add the following to `cline_mcp_settings.json`:
       "args": ["/path/to/image-mcp-server/dist/index.js"],
       "env": {
         "OPENAI_API_KEY": "your_openai_api_key"
-      },
-      "disabled": false,
-      "autoApprove": []
+      }
     }
   }
 }
@@ -85,9 +82,7 @@ Add the following to `claude_desktop_config.json`:
       "args": ["/path/to/image-mcp-server/dist/index.js"],
       "env": {
         "OPENAI_API_KEY": "your_openai_api_key"
-      },
-      "disabled": false,
-      "autoApprove": []
+      }
     }
   }
 }
@@ -103,11 +98,13 @@ Once the MCP server is configured, the following tools become available:
 ### Usage Examples
 
 **Analyzing from URL:**
+
 ```
 Please analyze this image URL: https://example.com/image.jpg
 ```
 
 **Analyzing from local file path:**
+
 ```
 Please analyze this image: /path/to/your/image.jpg
 ```
