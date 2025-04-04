@@ -15,16 +15,16 @@ import * as path from 'path'; // Import path for path operations
 import * as os from 'os'; // Import os module
 import * as mime from 'mime-types'; // Revert to import statement
 
-// .envファイルから環境変数を読み込む
+// Load environment variables from .env file
 dotenv.config();
 
-// OpenAI APIキーを環境変数から取得
+// Get OpenAI API key from environment variables
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 if (!OPENAI_API_KEY) {
   throw new Error('OPENAI_API_KEY environment variable is required');
 }
 
-// OpenAIクライアントの初期化
+// Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: OPENAI_API_KEY,
 });
@@ -63,7 +63,7 @@ class ImageAnalysisServer {
 
     this.setupToolHandlers();
 
-    // エラーハンドリング
+    // Error handling
     this.server.onerror = (error) => console.error('[MCP Error]', error);
     process.on('SIGINT', async () => {
       await this.server.close();
@@ -72,18 +72,18 @@ class ImageAnalysisServer {
   }
 
   private setupToolHandlers() {
-    // ツール一覧の定義
+    // Define tool list
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         {
           name: 'analyze_image',
-          description: '画像URLを受け取り、GPT-4o-miniを使用して画像の内容を分析します',
+          description: 'Receives an image URL and analyzes the image content using GPT-4o-mini',
           inputSchema: {
             type: 'object',
             properties: {
               imageUrl: {
                 type: 'string',
-                description: '分析する画像のURL',
+                description: 'URL of the image to analyze',
               },
             },
             required: ['imageUrl'],
@@ -92,13 +92,13 @@ class ImageAnalysisServer {
         // --- New Tool Definition ---
         {
           name: 'analyze_image_from_path',
-          description: 'ローカルファイルパスから画像を読み込み、GPT-4o-miniを使用して内容を分析します。AIアシスタントはサーバーの実行環境で有効なパスを渡す必要があります（例: WSL上のサーバーならLinuxパス）。',
+          description: 'Loads an image from a local file path and analyzes its content using GPT-4o-mini. AI assistants need to provide a valid path for the server execution environment (e.g., Linux path if the server is running on WSL).',
           inputSchema: {
             type: 'object',
             properties: {
               imagePath: {
                 type: 'string',
-                description: '分析する画像のローカルファイルパス（サーバー実行環境からアクセス可能な形式で指定）',
+                description: 'Local file path of the image to analyze (must be accessible from the server execution environment)',
               },
             },
             required: ['imagePath'],
@@ -108,7 +108,7 @@ class ImageAnalysisServer {
       ],
     }));
 
-    // ツール実行ハンドラ
+    // Tool execution handler
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const toolName = request.params.name;
       const args = request.params.arguments;
@@ -181,7 +181,7 @@ class ImageAnalysisServer {
           content: [
             {
               type: 'text',
-              text: `ツール実行エラー (${toolName}): ${error instanceof Error ? error.message : String(error)}`,
+              text: `Tool execution error (${toolName}): ${error instanceof Error ? error.message : String(error)}`,
             },
           ],
           isError: true,
@@ -190,7 +190,7 @@ class ImageAnalysisServer {
     });
   }
 
-  // 画像URLが有効かチェックするメソッド (既存)
+  // Method to check if the image URL is valid (existing)
   private async validateImageUrl(url: string): Promise<void> {
     try {
       const response = await axios.head(url);
@@ -206,7 +206,7 @@ class ImageAnalysisServer {
     }
   }
 
-  // GPT-4o-miniで画像を分析するメソッド (修正: URLまたはBase64を受け取る)
+  // Method to analyze images with GPT-4o-mini (modified: accepts URL or Base64)
   private async analyzeImageWithGpt4(
      imageData: { type: 'url', data: string } | { type: 'base64', data: string, mimeType: string }
    ): Promise<string> {
@@ -224,12 +224,12 @@ class ImageAnalysisServer {
         messages: [
           {
             role: 'system',
-            content: '画像の内容を詳細に分析し、日本語で説明してください。',
+            content: 'Analyze the image content in detail and provide an explanation in English.',
           },
           {
             role: 'user',
             content: [
-              { type: 'text', text: '以下の画像を分析して、内容を詳しく説明してください。' },
+              { type: 'text', text: 'Please analyze the following image and explain its content in detail.' },
               imageInput, // Use the constructed image input
             ],
           },
@@ -237,10 +237,10 @@ class ImageAnalysisServer {
         max_tokens: 1000,
       });
 
-      return response.choices[0]?.message?.content || '分析結果を取得できませんでした。';
+      return response.choices[0]?.message?.content || 'Could not retrieve analysis results.';
     } catch (error) {
       console.error('OpenAI API error:', error);
-      throw new Error(`OpenAI APIエラー: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(`OpenAI API error: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
