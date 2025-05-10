@@ -2,11 +2,13 @@
 
 画像 URL またはローカルファイルパスを受け取り、GPT-4o-mini モデルを使用して画像の内容を分析する MCP サーバーです。
 
-[English README](README.md)
+[English README](README.md) | [한국어 README](README.ko.md)
 
 <a href="https://glama.ai/mcp/servers/@champierre/image-mcp-server">
   <img width="380" height="200" src="https://glama.ai/mcp/servers/@champierre/image-mcp-server/badge" alt="Image Analysis MCP Server" />
 </a>
+
+[![smithery badge](https://smithery.ai/badge/@champierre/image-mcp-server)](https://smithery.ai/server/@champierre/image-mcp-server)
 
 ## 機能
 
@@ -14,8 +16,21 @@
 - GPT-4o-mini モデルを使用した高精度な画像認識と説明
 - 画像 URL の有効性チェック機能
 - ローカルファイルからの画像読み込みと Base64 エンコード
+- ローカルファイルパスの安全な取り扱い
+- ユーザーのホームディレクトリに分析結果を永続的にキャッシュして API 呼び出しを削減し、パフォーマンスを向上
+- プロジェクト間でキャッシュを共有
 
 ## インストール
+
+### Smithery を通じたインストール
+
+Claude Desktop 用の Image Analysis Server を [Smithery](https://smithery.ai/server/@champierre/image-mcp-server) を通じて自動的にインストールするには：
+
+```bash
+npx -y @smithery/cli install @champierre/image-mcp-server --client claude
+```
+
+### 手動インストール
 
 ```bash
 # リポジトリをクローン
@@ -83,6 +98,15 @@ MCP サーバーが設定されると、以下のツールが利用可能にな�
 
 - `analyze_image`: 画像 URL を受け取り、その内容を分析します。
 - `analyze_image_from_path`: ローカルファイルパスを受け取り、その内容を分析します。
+
+### キャッシュ機能
+
+このサーバーには、分析結果をユーザーのホームディレクトリ（`image-analysis`フォルダ内）に保存する永続的なキャッシュ機能が含まれています。以前に分析した画像の分析をリクエストすると、サーバーは OpenAI に新しい API 呼び出しを行う代わりにキャッシュされた結果を取得します。これにより、パフォーマンスが大幅に向上し、API コストが削減されます。
+
+- URL ベースの画像は URL に基づいてキャッシュされます
+- ローカルファイルベースの画像はファイルパスに基づいてキャッシュされます
+
+キャッシュはサーバーの再起動後も保持され、サーバーを使用する異なるプロジェクト間で共有されます。
 
 ### 使用例
 

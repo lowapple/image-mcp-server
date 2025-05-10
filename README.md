@@ -1,6 +1,6 @@
 # image-mcp-server
 
-[日本語の README](README.ja.md)
+[日本語の README](README.ja.md) | [한국어 README](README.ko.md)
 
 <a href="https://glama.ai/mcp/servers/@champierre/image-mcp-server">
   <img width="380" height="200" src="https://glama.ai/mcp/servers/@champierre/image-mcp-server/badge" alt="Image Analysis MCP Server" />
@@ -15,6 +15,10 @@ An MCP server that receives image URLs or local file paths and analyzes image co
 - High-precision image recognition and description using the GPT-4o-mini model
 - Image URL validity checking
 - Image loading from local files and Base64 encoding
+- Secure file path handling for local images
+- Permanent caching of analysis results to reduce API calls and improve performance
+- Cache stored in user's home directory for persistence across projects
+- Compatible with MCP clients like Claude Desktop App and Cline
 
 ## Installation
 
@@ -94,6 +98,15 @@ Once the MCP server is configured, the following tools become available:
 
 - `analyze_image`: Receives an image URL and analyzes its content.
 - `analyze_image_from_path`: Receives a local file path and analyzes its content.
+
+### Caching Feature
+
+This server includes a permanent caching feature that stores analysis results in the user's home directory (in the `image-analysis` folder). When requesting analysis of a previously analyzed image, the server retrieves the cached result instead of making a new API call to OpenAI. This significantly improves performance and reduces API costs.
+
+- URL-based images are cached based on the URL
+- Local file-based images are cached based on the file path
+
+The cache persists between server restarts and is shared across different projects using the server.
 
 ### Usage Examples
 

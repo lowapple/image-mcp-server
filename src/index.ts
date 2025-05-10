@@ -14,9 +14,35 @@ import * as fs from 'fs'; // Import fs for file reading
 import * as path from 'path'; // Import path for path operations
 import * as os from 'os'; // Import os module
 import * as mime from 'mime-types'; // Revert to import statement
+import { Low } from 'lowdb';
+import { JSONFile } from 'lowdb/node';
+import crypto from 'crypto';
 
 // Load environment variables from .env file
 dotenv.config();
+
+// Define cache schema
+type CacheData = {
+  urlCache: Record<string, {
+    analysis: string,
+    timestamp: number
+  }>,
+  pathCache: Record<string, {
+    analysis: string,
+    timestamp: number
+  }>
+}
+
+// Initialize cache with lowdb
+// Create cache directory if it doesn't exist
+const cacheDirPath = path.join(os.homedir(), 'image-analysis');
+if (!fs.existsSync(cacheDirPath)) {
+  fs.mkdirSync(cacheDirPath, { recursive: true });
+}
+
+const cacheFilePath = path.join(cacheDirPath, 'image-analysis-cache.json');
+const adapter = new JSONFile<CacheData>(cacheFilePath);
+const db = new Low<CacheData>(adapter, { urlCache: {}, pathCache: {} });
 
 // Get OpenAI API key from environment variables
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -69,6 +95,60 @@ class ImageAnalysisServer {
       await this.server.close();
       process.exit(0);
     });
+    
+    // Initialize cache
+    this.initCache().catch(err => console.error('Failed to initialize cache:', err));
+  }
+
+  // Add cache-related methods
+  private async initCache() {
+    await db.read();
+  }
+
+  private async saveCache() {
+    await db.write();
+  }
+
+  private getCachedAnalysis(key: string, isUrl: boolean): string | null {
+    // Initialize if not read yet
+    if (db.data === null) {
+      return null;
+    }
+
+    const cache = isUrl ? db.data.urlCache : db.data.pathCache;
+    const cachedItem = cache[key];
+    
+    if (!cachedItem) {
+      return null;
+    }
+
+    // TTL 체크 제거, 캐시가 있으면 항상 사용
+    console.error(`[Cache] Using cached analysis for ${isUrl ? 'URL' : 'path'}: ${key.substring(0, 10)}...`);
+    return cachedItem.analysis;
+  }
+
+  private async cacheAnalysis(key: string, analysis: string, isUrl: boolean) {
+    if (db.data === null) {
+      await this.initCache();
+      if (db.data === null) return; // Safety check
+    }
+
+    const cache = isUrl ? db.data.urlCache : db.data.pathCache;
+    cache[key] = {
+      analysis,
+      timestamp: Date.now() // 타임스탬프는 참고용으로 유지
+    };
+
+    console.error(`[Cache] Stored analysis for ${isUrl ? 'URL' : 'path'}: ${key.substring(0, 10)}...`);
+    try {
+      await this.saveCache();
+    } catch (err) {
+      console.error('Failed to save cache:', err);
+    }
+  }
+
+  private generateCacheKey(input: string): string {
+    return crypto.createHash('md5').update(input).digest('hex');
   }
 
   private setupToolHandlers() {
@@ -123,9 +203,21 @@ class ImageAnalysisServer {
               'Invalid arguments for analyze_image: imageUrl (string) is required'
             );
           }
+          
           const imageUrl = args.imageUrl;
-          await this.validateImageUrl(imageUrl); // Validate URL accessibility
-          analysis = await this.analyzeImageWithGpt4({ type: 'url', data: imageUrl });
+          const cacheKey = this.generateCacheKey(imageUrl);
+          
+          // Check cache first
+          const cachedAnalysis = this.getCachedAnalysis(cacheKey, true);
+          if (cachedAnalysis) {
+            analysis = cachedAnalysis;
+          } else {
+            // Not in cache, proceed with analysis
+            await this.validateImageUrl(imageUrl); // Validate URL accessibility
+            analysis = await this.analyzeImageWithGpt4({ type: 'url', data: imageUrl });
+            // Cache the result
+            await this.cacheAnalysis(cacheKey, analysis, true);
+          }
 
         } else if (toolName === 'analyze_image_from_path') {
           if (!isValidAnalyzeImagePathArgs(args)) {
@@ -134,28 +226,38 @@ class ImageAnalysisServer {
               'Invalid arguments for analyze_image_from_path: imagePath (string) is required'
             );
           }
+          
           const imagePath = args.imagePath;
-          // Basic security check: prevent absolute paths trying to escape common roots (adjust as needed)
-          // This is a VERY basic check and might need refinement based on security requirements.
-          if (path.isAbsolute(imagePath) && !imagePath.startsWith(process.cwd()) && !imagePath.startsWith(os.homedir()) && !imagePath.startsWith('/mnt/')) {
-             // Allow relative paths, paths within cwd, home, or WSL mounts. Adjust if needed.
-             console.warn(`Potential unsafe path access attempt blocked: ${imagePath}`);
-             throw new McpError(ErrorCode.InvalidParams, 'Invalid or potentially unsafe imagePath provided.');
-          }
+          const cacheKey = this.generateCacheKey(imagePath);
+          
+          // Check cache first
+          const cachedAnalysis = this.getCachedAnalysis(cacheKey, false);
+          if (cachedAnalysis) {
+            analysis = cachedAnalysis;
+          } else {
+            // Security checks for the path
+            if (path.isAbsolute(imagePath) && !imagePath.startsWith(process.cwd()) && !imagePath.startsWith(os.homedir()) && !imagePath.startsWith('/mnt/')) {
+              console.warn(`Potential unsafe path access attempt blocked: ${imagePath}`);
+              throw new McpError(ErrorCode.InvalidParams, 'Invalid or potentially unsafe imagePath provided.');
+            }
 
-          const resolvedPath = path.resolve(imagePath); // Resolve relative paths
-          if (!fs.existsSync(resolvedPath)) {
-            throw new McpError(ErrorCode.InvalidParams, `File not found at path: ${resolvedPath}`);
-          }
-          const imageDataBuffer = fs.readFileSync(resolvedPath);
-          const base64String = imageDataBuffer.toString('base64');
-          const mimeType = mime.lookup(resolvedPath) || 'application/octet-stream'; // Detect MIME type or default
+            const resolvedPath = path.resolve(imagePath); // Resolve relative paths
+            if (!fs.existsSync(resolvedPath)) {
+              throw new McpError(ErrorCode.InvalidParams, `File not found at path: ${resolvedPath}`);
+            }
+            
+            const imageDataBuffer = fs.readFileSync(resolvedPath);
+            const base64String = imageDataBuffer.toString('base64');
+            const mimeType = mime.lookup(resolvedPath) || 'application/octet-stream'; // Detect MIME type or default
 
-          if (!mimeType.startsWith('image/')) {
-             throw new McpError(ErrorCode.InvalidParams, `File is not an image: ${mimeType}`);
-          }
+            if (!mimeType.startsWith('image/')) {
+              throw new McpError(ErrorCode.InvalidParams, `File is not an image: ${mimeType}`);
+            }
 
-          analysis = await this.analyzeImageWithGpt4({ type: 'base64', data: base64String, mimeType: mimeType });
+            analysis = await this.analyzeImageWithGpt4({ type: 'base64', data: base64String, mimeType: mimeType });
+            // Cache the result
+            await this.cacheAnalysis(cacheKey, analysis, false);
+          }
 
         } else {
           throw new McpError(

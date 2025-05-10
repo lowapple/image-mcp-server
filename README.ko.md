@@ -16,7 +16,9 @@
 - GPT-4o-mini 모델을 사용한 고정밀 이미지 인식 및 설명
 - 이미지 URL 유효성 검사 기능
 - 로컬 파일에서 이미지 로드 및 Base64 인코딩
-- 성능 향상 및 API 비용 절감을 위한 분석 결과 캐싱 기능
+- 로컬 파일 경로의 안전한 처리
+- 사용자 홈 디렉토리에 영구적으로 분석 결과를 캐싱하여 API 호출 감소 및 성능 향상
+- 프로젝트 간 캐시 공유 가능
 
 ## 설치
 
@@ -48,10 +50,7 @@ npm run build
 
 ```
 OPENAI_API_KEY=your_openai_api_key
-DB_PATH=./path/to/database # 선택사항, 기본값은 ./db
 ```
-
-`DB_PATH` 변수는 서버가 이미지 분석 캐시 데이터베이스를 저장할 위치를 결정합니다. 설정하지 않을 경우 현재 작업 디렉토리 내의 `db` 디렉토리가 기본값으로 사용됩니다.
 
 ## MCP 서버 설정
 
@@ -68,8 +67,7 @@ Cline과 같은 도구에서 사용하려면 MCP 서버 설정 파일에 다음 
       "command": "node",
       "args": ["/path/to/image-mcp-server/dist/index.js"],
       "env": {
-        "OPENAI_API_KEY": "your_openai_api_key",
-        "DB_PATH": "/path/to/database" // 선택사항
+        "OPENAI_API_KEY": "your_openai_api_key"
       }
     }
   }
@@ -87,8 +85,7 @@ Cline과 같은 도구에서 사용하려면 MCP 서버 설정 파일에 다음 
       "command": "node",
       "args": ["/path/to/image-mcp-server/dist/index.js"],
       "env": {
-        "OPENAI_API_KEY": "your_openai_api_key",
-        "DB_PATH": "/path/to/database" // 선택사항
+        "OPENAI_API_KEY": "your_openai_api_key"
       }
     }
   }
@@ -104,12 +101,12 @@ MCP 서버가 설정되면 다음 도구를 사용할 수 있습니다:
 
 ### 캐싱 기능
 
-이 서버에는 분석 결과를 로컬 데이터베이스에 저장하는 캐싱 기능이 추가되었습니다. 이전에 분석된 이미지 분석을 요청하면 서버는 OpenAI에 새로운 API 호출을 하는 대신 캐시된 결과를 검색합니다. 이로 인해 성능이 향상되고 API 비용이 절감됩니다.
+이 서버에는 분석 결과를 사용자의 홈 디렉토리(`image-analysis` 폴더)에 저장하는 영구 캐싱 기능이 포함되어 있습니다. 이전에 분석한 이미지에 대한 분석을 요청하면 서버는 OpenAI에 새로운 API 호출을 하는 대신 캐시된 결과를 검색합니다. 이를 통해 성능이 크게 향상되고 API 비용이 절감됩니다.
 
 - URL 기반 이미지는 URL에 기반하여 캐시됩니다
-- 로컬 파일 기반 이미지는 파일 내용 해시에 기반하여 캐시됩니다
+- 로컬 파일 기반 이미지는 파일 경로에 기반하여 캐시됩니다
 
-캐시는 `DB_PATH` 환경 변수로 지정된 위치의 JSON 파일에 저장됩니다.
+캐시는 서버 재시작 후에도 유지되며, 서버를 사용하는 다양한 프로젝트 간에 공유됩니다. 캐시에 만료 시간(TTL)이 없으므로 한 번 분석된 이미지는 영구적으로 캐시됩니다.
 
 ### 사용 예시
 
