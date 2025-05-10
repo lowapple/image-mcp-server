@@ -1,0 +1,45 @@
+# Cursor Rules for MCP Image Recognition Server
+
+## Project Structure
+- `src/index.ts` - The main entry point containing all server logic
+- `package.json` - Project dependencies and npm scripts
+- `README.md` - Documentation in English
+- `README.ja.md` - Documentation in Japanese
+- `Dockerfile` - Container configuration
+- `memory-bank/` - Contains documentation about the project
+
+## Code Patterns
+- Use TypeScript for all new code
+- Follow existing error handling patterns with McpError for MCP-specific errors
+- Validate all user inputs before processing
+- Use async/await pattern for asynchronous operations
+- Use environment variables for configuration (via dotenv)
+
+## Style Conventions
+- Use camelCase for variables and functions
+- Use PascalCase for classes and interfaces
+- Add type annotations for all function parameters and return types
+- Group related functionality into classes (e.g., ImageAnalysisServer)
+- Use descriptive variable and function names
+
+## Security Guidelines
+- Always validate image URLs before fetching
+- Always validate and sanitize file paths before accessing
+- Check MIME types to ensure only images are processed
+- Use path resolution carefully to prevent directory traversal attacks
+
+## Development Workflow
+- Use `npm run build` to compile TypeScript to JavaScript
+- Use `npm run dev` for development with ts-node
+- Use `npm start` to run the compiled JavaScript
+
+## Tool Structure
+- Follow existing tool definition pattern with name, description, and input schema
+- Use type guards to validate incoming arguments
+- Handle errors gracefully and return appropriate error messages
+
+## Project Constraints
+- The server must be compatible with the MCP protocol
+- All tools must validate inputs thoroughly
+- Local file access must include security checks
+- OpenAI API key must be configured via environment variables 
